@@ -1,6 +1,6 @@
 from models import Conta, engine, Bancos, Status, Historico, Tipos
 from sqlmodel import Session, select
-from datetime import date
+from datetime import date, timedelta
 
 def criar_conta(conta: Conta):
     with Session(engine) as session:
@@ -72,6 +72,15 @@ def total_contas():
 
     return float(total)
 
+def buscar_historicos_entre_datas(data_inicio: date, data_fim: date):
+    with Session(engine) as session:
+        statement = select(Historico).where(
+            Historico.data >= data_inicio,
+            Historico.data <= data_fim
+        )
+        resultados = session.exec(statement).all()
+        return resultados
+    
 # conta = Conta(valor=0, banco=Bancos.SANTANDER)
 # criar_conta(conta)
 
@@ -84,4 +93,7 @@ def total_contas():
 
 # print(listar_contas())
 
-print(total_contas())
+# print(total_contas())
+
+x = buscar_historicos_entre_datas(date.today() - timedelta(days=1), date.today())
+print(x)

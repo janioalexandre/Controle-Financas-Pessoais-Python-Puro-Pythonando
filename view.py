@@ -109,4 +109,4 @@ def criar_grafico_por_conta():
 # x = buscar_historicos_entre_datas(date.today() - timedelta(days=1), date.today())
 # print(x)
 
-criar_grafico_por_conta()
+# criar_grafico_por_conta()

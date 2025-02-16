@@ -1,5 +1,6 @@
-from models import Conta, engine, Bancos, Status
+from models import Conta, engine, Bancos, Status, Historico, Tipos
 from sqlmodel import Session, select
+from datetime import date
 
 def criar_conta(conta: Conta):
     with Session(engine) as session:
@@ -40,10 +41,47 @@ def transferir_saldo(id_conta_saida, id_conta_entrada, valor):
         conta_saida.valor -= valor
         conta_entrada.valor += valor
         session.commit()
+
+def movimentar_dinheiro(historico: Historico):
+    with Session(engine) as session:
+        statement = select(Conta).where(Conta.id==historico.conta_id)
+        conta = session.exec(statement).first()
         
+        if conta.status == Status.INATIVO:
+            raise ValueError("Conta inativa")
+
+        if historico.tipo == Tipos.ENTRADA:
+            conta.valor += historico.valor
+        else:
+            if conta.valor < historico.valor:
+                raise ValueError("Saldo insuficiente")
+            conta.valor -= historico.valor
+
+        session.add(historico)
+        session.commit()
+        return historico
+
+def total_contas():
+    with Session(engine) as session:
+        statement = select(Conta)
+        contas = session.exec(statement).all()
+
+    total = 0
+    for conta in contas:
+        total += conta.valor
+
+    return float(total)
+
 # conta = Conta(valor=0, banco=Bancos.SANTANDER)
 # criar_conta(conta)
 
-desativar_conta(3)
+# desativar_conta(3)
+
+# historico = Historico(conta_id=1, tipo=Tipos.SAIDA, valor=100, data=date.today()) 
+# movimentar_dinheiro(historico)
+
+#transferir_saldo(1, 2, 1000)
 
 # print(listar_contas())
+
+print(total_contas())
